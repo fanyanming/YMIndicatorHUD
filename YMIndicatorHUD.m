@@ -20,8 +20,28 @@
 @end
 @implementation YMIndicatorHUD
 UIView *_HUD = nil;
+UIView *_successHUD = nil;
+UIView *_infoHUD = nil;
+UIView *_loadingHUD = nil;
 UIColor *_backgroundColor = nil;
 UIColor *_foregroundColor = nil;
+
++ (void)showLoadingHUD {
+    CGRect frame = [UIScreen mainScreen].bounds;
+    
+    UIView *hudView = [[UIView alloc] initWithFrame:frame];
+    hudView.backgroundColor = [UIColor colorWithWhite:0 alpha:0.1];
+    [[UIApplication sharedApplication].keyWindow addSubview:hudView];
+    _loadingHUD = hudView;
+    
+    // 添加菊花
+    UIActivityIndicatorView *activityView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:(UIActivityIndicatorViewStyleWhiteLarge)];
+    activityView.center = CGPointMake(frame.size.width * 0.5, frame.size.height * 0.5);
+    activityView.color = [UIColor blackColor];
+    [hudView addSubview:activityView];
+    [activityView startAnimating];
+    
+}
 
 + (void)showSuccess {
     CGRect frame = [UIScreen mainScreen].bounds;
@@ -31,10 +51,16 @@ UIColor *_foregroundColor = nil;
     YMAnimationView *animationView = [[YMAnimationView alloc] initWithSuccessIconWithFrame:CGRectMake(15, 15, 50, 50)];
     [HUDView addSubview:animationView];
     [[UIApplication sharedApplication].keyWindow addSubview:HUDView];
-    _HUD = HUDView;
+    _successHUD = HUDView;
     
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        [HUDView removeFromSuperview];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [UIView animateWithDuration:0.5 animations:^{
+            HUDView.alpha = 0;
+        }];
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            [HUDView removeFromSuperview];
+        });
+        
     });
 }
 
@@ -62,7 +88,7 @@ UIColor *_foregroundColor = nil;
     YMAnimationView *animationView = [[YMAnimationView alloc] initWithInfoIconWithFrame:CGRectMake((messageWidth + 6 - 50)/2.0, 15, 50, 50) foregroundColor:[self foregroundColor]];
     [HUDView addSubview:animationView];
     [[UIApplication sharedApplication].keyWindow addSubview:HUDView];
-    _HUD = HUDView;
+    _infoHUD = HUDView;
     
     // 文字
     UILabel *messageLabel = [[UILabel alloc] initWithFrame:CGRectMake(3, CGRectGetMaxY(animationView.frame) + 5, messageWidth, 20)];
@@ -73,7 +99,13 @@ UIColor *_foregroundColor = nil;
     [HUDView addSubview:messageLabel];
     
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [UIView animateWithDuration:0.5 animations:^{
+            HUDView.alpha = 0;
+        }];
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         [HUDView removeFromSuperview];
+        });
+        
     });
 }
 
@@ -93,7 +125,18 @@ UIColor *_foregroundColor = nil;
 }
 
 + (void)hide {
-    [_HUD removeFromSuperview];
+    [UIView animateWithDuration:0.5 animations:^{
+        _successHUD.alpha = 0;
+        _loadingHUD.alpha = 0;
+        _infoHUD.alpha = 0;
+    }];
+    
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [_successHUD removeFromSuperview];
+        [_infoHUD removeFromSuperview];
+        [_loadingHUD removeFromSuperview];
+    });
+    
 }
 
 + (void)setBackgroundColor:(UIColor *)color {

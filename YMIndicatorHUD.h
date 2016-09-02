@@ -10,6 +10,7 @@
 @interface YMIndicatorHUD : NSObject
 + (void)showSuccess;
 + (void)showMessage:(NSString *)message;
++ (void)showLoadingHUD;// cover the screen, stop touch events
 + (void)hide;
 
 // Please set color before you show the view
