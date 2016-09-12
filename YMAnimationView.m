@@ -34,7 +34,7 @@
         [self.layer addSublayer:animationLayer];
         
         CABasicAnimation *basicAniamtion = [CABasicAnimation animationWithKeyPath:@"strokeEnd"];
-        basicAniamtion.duration = 0.75;
+        basicAniamtion.duration = 0.5;
         basicAniamtion.fromValue = [NSNumber numberWithInteger:0];
         basicAniamtion.toValue = [NSNumber numberWithInteger:1];
         
@@ -43,11 +43,11 @@
         shakeAnimation.repeatCount = 2;
         shakeAnimation.values = @[@(-5),@(0),@(5),@(0)];
         shakeAnimation.duration = 0.25;
-        shakeAnimation.beginTime = 0.75;
+        shakeAnimation.beginTime = 0.5;
         shakeAnimation.speed = 1.5;
         CAAnimationGroup *animationGroup= [CAAnimationGroup animation];
         animationGroup.animations = @[basicAniamtion, shakeAnimation];
-        animationGroup.duration = 0.75 + 0.34;
+        animationGroup.duration = 0.5 + 0.34;
         [animationLayer addAnimation:animationGroup forKey:@"key"];
         
     }
@@ -56,7 +56,7 @@
 }
 
 #pragma mark - success icon
-- (instancetype)initWithSuccessIconWithFrame:(CGRect)frame {
+- (instancetype)initWithSuccessIconWithFrame:(CGRect)frame{
     if (self = [super initWithFrame:frame]) {
         self.backgroundColor = [UIColor clearColor];
         UIBezierPath *checkPath = [UIBezierPath bezierPathWithArcCenter:CGPointMake(25, 25) radius:25 startAngle:-M_PI endAngle:M_PI * 2 clockwise:YES];

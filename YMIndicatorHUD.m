@@ -26,6 +26,51 @@ UIView *_loadingHUD = nil;
 UIColor *_backgroundColor = nil;
 UIColor *_foregroundColor = nil;
 
++ (void)showSuccessMessage:(NSString *)message {
+    if (message.length == 0) {
+        message = @"操作成功";
+    }
+    
+    // 计算message的宽高
+    CGRect messageFrame = [message boundingRectWithSize:CGSizeMake(MAXFLOAT, 20) options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName : [UIFont systemFontOfSize:14]} context:nil];
+    CGFloat messageWidth = messageFrame.size.width;
+    
+    if (messageWidth + 6 < 100) {
+        messageWidth = 100;
+    }
+    
+    // hud container
+    CGRect frame = [UIScreen mainScreen].bounds;
+    UIView *HUDView = [[UIView alloc] initWithFrame:CGRectMake((frame.size.width - messageWidth - 6)/2.0, (frame.size.height - 100)/2.0, messageWidth + 6, 100)];
+    HUDView.layer.cornerRadius = 5;
+    HUDView.backgroundColor = [self backgroundColor];
+    
+    // content view
+    YMAnimationView *animationView = [[YMAnimationView alloc] initWithSuccessIconWithFrame:CGRectMake((messageWidth + 6 - 50)/2.0, 15, 50, 50)];
+    [HUDView addSubview:animationView];
+    [[UIApplication sharedApplication].keyWindow addSubview:HUDView];
+    _infoHUD = HUDView;
+    
+    // 文字
+    UILabel *messageLabel = [[UILabel alloc] initWithFrame:CGRectMake(3, CGRectGetMaxY(animationView.frame) + 5, messageWidth, 20)];
+    messageLabel.textAlignment = NSTextAlignmentCenter;
+    messageLabel.text = message;
+    messageLabel.textColor = [UIColor whiteColor];
+    messageLabel.font = [UIFont systemFontOfSize:14];
+    [HUDView addSubview:messageLabel];
+    
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [UIView animateWithDuration:0.5 animations:^{
+            HUDView.alpha = 0;
+        }];
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            [HUDView removeFromSuperview];
+        });
+        
+    });
+
+}
+
 + (void)showLoadingHUD {
     CGRect frame = [UIScreen mainScreen].bounds;
     
@@ -34,12 +79,64 @@ UIColor *_foregroundColor = nil;
     [[UIApplication sharedApplication].keyWindow addSubview:hudView];
     _loadingHUD = hudView;
     
+    // center container
+    UIView *centralContainerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 80, 80)];
+    centralContainerView.center = CGPointMake(frame.size.width/2.0, frame.size.height/2.0);
+    centralContainerView.backgroundColor = CCTabbarBlackColor;
+    [hudView addSubview:centralContainerView];
+    
+    
     // 添加菊花
     UIActivityIndicatorView *activityView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:(UIActivityIndicatorViewStyleWhiteLarge)];
-    activityView.center = CGPointMake(frame.size.width * 0.5, frame.size.height * 0.5);
-    activityView.color = [UIColor blackColor];
-    [hudView addSubview:activityView];
+    activityView.center = CGPointMake(40, 40);
+    [centralContainerView addSubview:activityView];
     [activityView startAnimating];
+    
+}
+
++ (void)showLoadingWithInfo:(NSString *)message {
+    
+    if (message.length == 0) {
+        message = @"加载中...";
+    }
+    
+    // 计算message的宽高
+    CGRect messageFrame = [message boundingRectWithSize:CGSizeMake(MAXFLOAT, 20) options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName : [UIFont systemFontOfSize:14]} context:nil];
+    CGFloat messageWidth = messageFrame.size.width;
+    
+    if (messageWidth + 6 < 100) {
+        messageWidth = 100;
+    }
+    
+    CGRect frame = [UIScreen mainScreen].bounds;
+    
+    UIView *hudView = [[UIView alloc] initWithFrame:frame];
+    hudView.backgroundColor = [UIColor colorWithWhite:0 alpha:0.1];
+    [[UIApplication sharedApplication].keyWindow addSubview:hudView];
+    _loadingHUD = hudView;
+    
+    // center container
+    UIView *centralContainerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, messageWidth + 6, 100)];
+    centralContainerView.layer.cornerRadius = 5.0;
+    centralContainerView.center = CGPointMake(frame.size.width/2.0, frame.size.height/2.0);
+    centralContainerView.backgroundColor = CCTabbarBlackColor;
+    [hudView addSubview:centralContainerView];
+    
+    
+    // 添加菊花
+    UIActivityIndicatorView *activityView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:(UIActivityIndicatorViewStyleWhiteLarge)];
+    activityView.center = CGPointMake(messageWidth/2.0, 40);
+    [centralContainerView addSubview:activityView];
+    [activityView startAnimating];
+
+    // 文字
+    UILabel *messageLabel = [[UILabel alloc] initWithFrame:CGRectMake(3, CGRectGetMaxY(activityView.frame) + 5, messageWidth, 20)];
+    messageLabel.textAlignment = NSTextAlignmentCenter;
+    messageLabel.text = message;
+    messageLabel.textColor = [UIColor lightTextColor];
+    messageLabel.font = CCFont14;
+    [centralContainerView addSubview:messageLabel];
+    
     
 }
 
@@ -126,14 +223,10 @@ UIColor *_foregroundColor = nil;
 
 + (void)hide {
     [UIView animateWithDuration:0.5 animations:^{
-        _successHUD.alpha = 0;
         _loadingHUD.alpha = 0;
-        _infoHUD.alpha = 0;
     }];
     
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        [_successHUD removeFromSuperview];
-        [_infoHUD removeFromSuperview];
         [_loadingHUD removeFromSuperview];
     });
     
